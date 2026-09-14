@@ -1,0 +1,48 @@
+OVERALL GOAL
+= A CUSTOM Retrieval-Augmented Generation (RAG)
+
+What this does
+
+Reads your PDFs and pulls out the text, page by page.
+Splits that text into small overlapping chunks.
+Converts each chunk into a vector (embedding) that captures its meaning.
+Stores all vectors in a searchable index (FAISS).
+When you ask a question, it embeds the question, finds the most similar chunks, and hands them to Claude along with your question so it can answer grounded in your actual documents.
+
+
+Rags can be broken down into 2 steps.
+Indexing and Query
+
+TUNABLE DECISIONS FOR THE PIPELINE
+ - The pdfs
+ - Chunking
+    Deciding the chunk sizes and how they'll overlap
+    Chunk_size is large enough to contain whole/full ideas
+    Chunk_overlap prevents losing context at chunk boundaries
+ - Embedding models
+    Embedding model 
+ - Retrieval
+   Top-k ( The number of chunks to recieve per question)
+   min-similarity (below this number, A chunk is considered irrelevant)
+- Generation
+  Generation model (gpt/claude/gemini)
+  Max output token
+  temp  (low temp  = more grounded but less creative answers)
+
+INDEXING 
+ - PDF 
+   Read the pdfs and return a list of dict. 1 dict per page
+ - Chunking
+   Splitting a one page's content into overlapping chunks for the embedding model.
+ - Embedding
+   Using the sentence transformer model to convert texts to vectors  (list of numbers that capture meaning). similar texts end up as nearby vectors in space
+ - Vector index and storage
+   
+
+Query
+ - Question (user input)
+ - Search Index (Top-k matches)
+ - Chunk found (with source)
+ - Generation (LLM answer) 
+
+
