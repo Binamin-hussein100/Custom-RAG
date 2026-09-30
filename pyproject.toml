@@ -3,11 +3,12 @@ name = "custom-rag"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 dependencies = [
     "faiss-cpu>=1.14.3",
     "google-genai>=2.8.0",
     "numpy>=2.4.6",
     "pypdf>=6.13.2",
+    "python-dotenv>=1.2.3",
     "sentence-transformers>=5.5.1",
 ]

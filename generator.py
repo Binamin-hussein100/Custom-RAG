@@ -59,7 +59,7 @@ def format_prompt(question: str, chunks: list) -> str:
     context = "\n\n".join(excerpts)
     return (
         "Answer the question using only the retrieved excerpts below. "
-        "Reference the source labels when citing policy requirements.\n\n"
+        "Cite the source labels, e.g. [Source 1], for every claim.\n\n"
         f"RETRIEVED EXCERPTS:\n{context}\n\n"
         f"QUESTION:\n{question.strip()}"
     )

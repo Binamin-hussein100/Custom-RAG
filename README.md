@@ -2,7 +2,7 @@
 
 A from-scratch Retrieval-Augmented Generation pipeline. It indexes PDF policy documents, retrieves the most relevant passages for a question, and asks Gemini to answer using only those excerpts.
 
-The current system prompt is tuned for **B-Cubed** QA / infrastructure / operational compliance audits against three policy PDFs:
+The sample corpus is three **B-Cubed** policy PDFs:
 
 - `b_cubed_engineering_policy.pdf`
 - `b_cubed_data_security_policy.pdf`
@@ -38,7 +38,7 @@ Question
 1. Embed the user question with the same model.
 2. Retrieve `TOP_K` nearest chunks (default 5), including source filename and page.
 3. Format a prompt that lists excerpts as `[Source N: file | page P]` (`generator.py`).
-4. Generate with Gemini (`gemini-1.5-flash`) using the auditor system prompt in `config.py`.
+4. Generate with Gemini (`gemini-2.5-flash`) using the grounded system prompt in `config.py`: answer only from the excerpts, cite `[Source N]`, and say "I don't know" when the excerpts don't cover the question.
 
 If retrieval returns nothing, the generator still asks the model, but tells it that no excerpts were found.
 
@@ -56,16 +56,19 @@ If retrieval returns nothing, the generator still asks the model, but tells it t
 
 ## Setup
 
-Requires Python 3.14+ and [uv](https://docs.astral.sh/uv/).
+Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
 uv sync
 ```
 
-Create a `.env` (or export in your shell) with a Gemini key. The generator looks for `GOOGLE_API_KEY` or `GEMINI_API_KEY`:
+Create a `.env` (or export in your shell) with a Gemini key. `config.py` loads it with `python-dotenv`; the generator looks for `GOOGLE_API_KEY` or `GEMINI_API_KEY`. Model names can be overridden the same way:
 
 ```bash
 GOOGLE_API_KEY=your-key-here
+# optional
+GENERATION_MODEL=gemini-2.5-flash
+EMBEDDING_MODEL=all-MiniLM-L6-v2
 ```
 
 Put PDFs in a `pdfs/` directory (that path is what `pdf_loader.py` uses in its `__main__` block).
@@ -74,7 +77,7 @@ The first embedding run downloads `all-MiniLM-L6-v2` from Hugging Face.
 
 ## Tunable settings
 
-All knobs live in `config.py`.
+All knobs live in `config.py`. `GENERATION_MODEL` and `EMBEDDING_MODEL` can also be set via environment variables.
 
 | Setting | Default | Why it matters |
 | --- | --- | --- |
@@ -83,7 +86,7 @@ All knobs live in `config.py`.
 | `EMBEDDING_MODEL` | `all-MiniLM-L6-v2` | Local, 384-dim; must match query and index |
 | `VECTOR_DATABASE` | `faiss` | In-memory / on-disk similarity search |
 | `TOP_K` | `5` | How many chunks the LLM sees per question |
-| `GENERATION_MODEL` | `gemini-1.5-flash` | Answer model |
+| `GENERATION_MODEL` | `gemini-2.5-flash` | Answer model |
 | `GENERATION_TEMPERATURE` | `0.0` | Low temperature → more grounded, less creative |
 | `GENERATION_MAX_TOKENS` | `1024` | Cap on answer length |
 
@@ -103,4 +106,4 @@ uv run python generator.py       # prompt format; live call if API key is set
 
 - Query and index **must** use the same embedding model. Re-index after changing `EMBEDDING_MODEL`.
 - FAISS search returns L2 distances (lower is closer) paired with chunk metadata.
-- Answers are instructed to stay inside retrieved excerpts and cite source labels / policy document IDs from the system prompt.
+- Answers are instructed to stay inside retrieved excerpts, cite `[Source N]` labels, and say "I don't know" when the excerpts don't cover the question.
