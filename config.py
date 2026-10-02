@@ -6,6 +6,11 @@ from dotenv import load_dotenv
 # Loads GOOGLE_API_KEY (and any overrides below) from a .env file, if present.
 load_dotenv()
 
+# Folder of source PDFs and where the built index is saved.
+PDF_DIR = os.getenv("PDF_DIR", "pdfs")
+
+INDEX_DIR = os.getenv("INDEX_DIR", "index")
+
 # Chunk size for the RAG system.
 CHUNK_SIZE = 1000
 
@@ -13,6 +18,9 @@ CHUNK_OVERLAP = 200
 
 # Embedding model to use for the RAG system.
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
+
+# Chunks embedded per call during indexing.
+EMBED_BATCH_SIZE = 64
 
 # Vector database to use for the RAG system.
 VECTOR_DATABASE = "faiss"

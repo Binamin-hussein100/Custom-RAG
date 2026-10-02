@@ -52,7 +52,8 @@ If retrieval returns nothing, the generator still asks the model, but tells it t
 | `embedder.py` | SentenceTransformer embeddings |
 | `vector_store.py` | FAISS index + metadata persistence |
 | `generator.py` | Prompt assembly + Gemini generation |
-| `main.py` | Entry point (stub: `Hello from custom-rag!`) |
+| `rag.py` | `build_index()` (load → chunk → embed → save) and `answer(question)` |
+| `main.py` | CLI: `ingest`, `ask`, `chat` |
 
 ## Setup
 
@@ -74,6 +75,20 @@ EMBEDDING_MODEL=all-MiniLM-L6-v2
 Put PDFs in a `pdfs/` directory (that path is what `pdf_loader.py` uses in its `__main__` block).
 
 The first embedding run downloads `all-MiniLM-L6-v2` from Hugging Face.
+
+## Usage
+
+```bash
+uv run python main.py ingest                  # build index/ from pdfs/
+uv run python main.py ingest --force          # rebuild even if nothing changed
+uv run python main.py ask "What happens if a unit test fails?"
+uv run python main.py ask "..." --top-k 3 --show-text
+uv run python main.py chat                    # interactive loop; 'exit' or empty line quits
+```
+
+`ingest` writes `index/index.faiss`, `index/metadata.json` and `index/manifest.json`. The manifest stores a SHA-256 of each PDF along with the embedding model and chunk settings. If none of these changed, `ingest` skips the work. `ask` and `chat` run this check first, so the index is never stale. `PDF_DIR` and `INDEX_DIR` can be overridden in `.env`.
+
+`answer()` returns `{answer, sources: [{source, page, score, text}]}`, where `sources[N-1]` is the excerpt cited as `[Source N]`.
 
 ## Tunable settings
 
