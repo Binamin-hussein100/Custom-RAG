@@ -25,6 +25,7 @@ def _get_client() -> genai.Client:
 def _normalize_chunks(chunks: list) -> list[dict]:
     """Accept metadata dicts or (score, metadata) tuples from vector search."""
     normalized = []
+    
     for item in chunks:
         if isinstance(item, tuple) and len(item) == 2:
             normalized.append(item[1])
